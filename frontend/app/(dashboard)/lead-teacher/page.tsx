@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { User, Member, SystemStats } from "@/types";
+import { User, Member, Evaluation } from "@/types";
 import { fetchWithAuth } from "@/lib/api";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,12 +19,22 @@ import {
   ArrowRight,
   Shield,
   Layers,
+  ChevronDown,
+  ChevronRight,
+  Briefcase,
+  CheckCircle2,
+  AlertCircle,
+  Clock,
+  ExternalLink,
 } from "lucide-react";
 import Link from "next/link";
 
 export default function LeadTeacherDashboardPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
+  const [evaluations, setEvaluations] = useState<Record<number, Evaluation>>({});
+  const [expandedUser, setExpandedUser] = useState<number | null>(null);
+  const [search, setSearch] = useState("");
   const [aiQuestion, setAiQuestion] = useState("");
   const [aiAnswer, setAiAnswer] = useState<any | null>(null);
   const [queryingAi, setQueryingAi] = useState(false);
@@ -33,12 +43,23 @@ export default function LeadTeacherDashboardPage() {
   useEffect(() => {
     async function load() {
       try {
-        const [usersRes, membersRes] = await Promise.all([
+        const [usersRes, membersRes, evalsRes] = await Promise.all([
           fetchWithAuth("/users"),
           fetchWithAuth("/members"),
+          fetchWithAuth("/evaluations"),
         ]);
         if (usersRes.ok) setUsers(await usersRes.json());
         if (membersRes.ok) setMembers(await membersRes.json());
+        if (evalsRes.ok) {
+          const evalsData: Evaluation[] = await evalsRes.json();
+          const map: Record<number, Evaluation> = {};
+          evalsData.forEach((ev) => {
+            if (!map[ev.member_id] || new Date(ev.created_at) > new Date(map[ev.member_id].created_at)) {
+              map[ev.member_id] = ev;
+            }
+          });
+          setEvaluations(map);
+        }
       } catch (e) {
         console.error("Failed to load Lead Teacher data", e);
       } finally {
@@ -69,7 +90,45 @@ export default function LeadTeacherDashboardPage() {
     }
   };
 
+  const getOutcomeBadge = (outcome?: string | null) => {
+    switch (outcome) {
+      case "eligible":
+        return (
+          <Badge variant="success" className="gap-1 font-semibold text-[10px]">
+            <CheckCircle2 className="h-2.5 w-2.5" />
+            Eligible
+          </Badge>
+        );
+      case "service_domain":
+        return (
+          <Badge variant="warning" className="gap-1 font-semibold text-[10px]">
+            <Clock className="h-2.5 w-2.5" />
+            Service
+          </Badge>
+        );
+      case "parked":
+        return (
+          <Badge variant="parked" className="gap-1 font-semibold text-[10px]">
+            <AlertCircle className="h-2.5 w-2.5" />
+            Parked
+          </Badge>
+        );
+      default:
+        return (
+          <Badge variant="outline" className="text-muted-foreground border-dashed text-[10px]">
+            Pending
+          </Badge>
+        );
+    }
+  };
+
   const eliteUsers = users.filter((u) => u.role === "elite_user");
+  const filteredUsers = eliteUsers.filter(
+    (u) =>
+      u.full_name.toLowerCase().includes(search.toLowerCase()) ||
+      u.email.toLowerCase().includes(search.toLowerCase()) ||
+      (u.batch && u.batch.toLowerCase().includes(search.toLowerCase()))
+  );
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
@@ -82,15 +141,23 @@ export default function LeadTeacherDashboardPage() {
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight mt-1">Cohort Oversight Portal</h1>
           <p className="text-sm text-muted-foreground">
-            Monitor all assigned Elite Assistant Teachers, review collected members, and query platform analytics via AI.
+            Inspect individual assistant teachers, drill into their collected candidate members, and review full AI evaluation reports.
           </p>
         </div>
-        <Link href="/lead-teacher/leaderboard">
-          <Button variant="outline" className="gap-1.5 font-semibold">
-            <TrendingUp className="h-4 w-4 text-amber-500" />
-            View Teacher Leaderboard
-          </Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link href="/elite">
+            <Button variant="default" className="gap-1.5 font-semibold">
+              <Users className="h-4 w-4" />
+              All Candidates Registry
+            </Button>
+          </Link>
+          <Link href="/lead-teacher/leaderboard">
+            <Button variant="outline" className="gap-1.5 font-semibold">
+              <TrendingUp className="h-4 w-4 text-amber-500" />
+              Teacher Leaderboard
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* AI Assistant Data Query Card */}
@@ -103,7 +170,7 @@ export default function LeadTeacherDashboardPage() {
             <div>
               <CardTitle className="text-base font-bold">Ask Cohort AI Assistant</CardTitle>
               <CardDescription className="text-xs">
-                Ask questions like &ldquo;Which Elite User has poor performance?&rdquo; or &ldquo;Who collected the most authentic candidates?&rdquo;
+                Query cohort analytics: &ldquo;Which Elite User collected the most eligible domains?&rdquo; or &ldquo;Summarize Morning batch activity.&rdquo;
               </CardDescription>
             </div>
           </div>
@@ -162,12 +229,26 @@ export default function LeadTeacherDashboardPage() {
         </Card>
       </div>
 
-      {/* Elite Users Supervision Table */}
-      <Card>
+      {/* Search Input for Elite Users */}
+      <div className="relative">
+        <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Filter Elite Users by name, email, or shift (Morning/Afternoon/Evening)..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="pl-9 bg-card text-sm h-10 shadow-sm"
+        />
+      </div>
+
+      {/* Elite Users Accordion / Detailed Drill-down */}
+      <Card className="border-border/80 shadow-sm overflow-hidden">
         <CardHeader className="p-4 sm:p-5 border-b bg-muted/15">
-          <CardTitle className="text-base font-bold flex items-center gap-2">
-            <Users className="h-4 w-4 text-primary" />
-            Assistant Teachers (Elite Users) Under Oversight
+          <CardTitle className="text-base font-bold flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Users className="h-4 w-4 text-primary" />
+              <span>Assistant Teachers & Candidate Details ({filteredUsers.length})</span>
+            </div>
+            <span className="text-xs font-normal text-muted-foreground">Click any teacher to inspect their members</span>
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0 divide-y">
@@ -175,31 +256,108 @@ export default function LeadTeacherDashboardPage() {
             <div className="p-8 flex justify-center">
               <Loader2 className="h-6 w-6 animate-spin text-primary" />
             </div>
-          ) : eliteUsers.length === 0 ? (
+          ) : filteredUsers.length === 0 ? (
             <div className="p-8 text-center text-sm text-muted-foreground">
-              No Elite Users currently registered in the platform.
+              No Assistant Teachers match your search criteria.
             </div>
           ) : (
-            eliteUsers.map((user) => {
+            filteredUsers.map((user) => {
               const userMembers = members.filter((m) => m.elite_user_id === user.id);
+              const isExpanded = expandedUser === user.id;
+
               return (
-                <div key={user.id} className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-muted/10">
-                  <div className="space-y-0.5">
-                    <div className="font-bold text-sm text-foreground flex items-center gap-2">
-                      <span>{user.full_name}</span>
-                      <Badge variant="outline" className="text-[10px] capitalize">
-                        {user.batch ? `Shift: ${user.batch}` : "No Shift"}
-                      </Badge>
+                <div key={user.id} className="transition-colors">
+                  {/* Teacher Summary Row */}
+                  <div
+                    onClick={() => setExpandedUser(isExpanded ? null : user.id)}
+                    className={`p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer hover:bg-muted/15 ${
+                      isExpanded ? "bg-muted/20 border-b" : ""
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-xs shrink-0">
+                        {user.full_name.charAt(0)}
+                      </div>
+                      <div className="space-y-0.5">
+                        <div className="font-bold text-sm text-foreground flex items-center gap-2">
+                          <span>{user.full_name}</span>
+                          <Badge variant="outline" className="text-[10px] capitalize">
+                            {user.batch ? `Shift: ${user.batch}` : "No Shift"}
+                          </Badge>
+                        </div>
+                        <div className="text-xs text-muted-foreground">{user.email}</div>
+                      </div>
                     </div>
-                    <div className="text-xs text-muted-foreground">{user.email}</div>
+
+                    <div className="flex items-center gap-4 text-xs font-medium self-end sm:self-center">
+                      <div className="text-right">
+                        <span className="font-bold text-foreground block text-sm">{userMembers.length}</span>
+                        <span className="text-muted-foreground text-[11px]">Candidates</span>
+                      </div>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
+                        {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                      </Button>
+                    </div>
                   </div>
 
-                  <div className="flex items-center gap-4 text-xs font-medium">
-                    <div className="text-right">
-                      <span className="font-bold text-foreground block text-sm">{userMembers.length}</span>
-                      <span className="text-muted-foreground text-[11px]">Members</span>
+                  {/* Expanded Members List for this Elite User */}
+                  {isExpanded && (
+                    <div className="bg-muted/5 p-4 sm:p-5 space-y-3 animate-in fade-in duration-200">
+                      <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center justify-between">
+                        <span>Candidate Profiles Scouted by {user.full_name}</span>
+                        <span>{userMembers.length} total</span>
+                      </div>
+
+                      {userMembers.length === 0 ? (
+                        <div className="p-6 text-center text-xs text-muted-foreground border border-dashed rounded-xl">
+                          This assistant teacher has not collected any candidate profiles yet.
+                        </div>
+                      ) : (
+                        <div className="grid sm:grid-cols-2 gap-3">
+                          {userMembers.map((m) => {
+                            const ev = evaluations[m.id];
+                            return (
+                              <Card key={m.id} className="p-4 bg-card border-border/80 hover:border-primary/50 transition-all flex flex-col justify-between">
+                                <div className="space-y-2">
+                                  <div className="flex items-start justify-between gap-2">
+                                    <div>
+                                      <div className="font-bold text-sm text-foreground">{m.name}</div>
+                                      <div className="text-xs font-medium text-primary flex items-center gap-1 mt-0.5">
+                                        <Briefcase className="h-3 w-3" />
+                                        <span>{m.domain}</span>
+                                      </div>
+                                    </div>
+                                    {getOutcomeBadge(ev?.outcome)}
+                                  </div>
+
+                                  <div className="text-xs text-muted-foreground line-clamp-2">
+                                    <strong>Exp:</strong> {m.experience}
+                                  </div>
+
+                                  {ev && (
+                                    <div className="flex items-center justify-between text-[11px] font-mono pt-2 border-t text-muted-foreground">
+                                      <span>Screen: {ev.screen_score?.toFixed(1) || "0.0"}/10</span>
+                                      <span>Tests: {ev.tests_score?.toFixed(1) || "0.0"}/8.0</span>
+                                    </div>
+                                  )}
+                                </div>
+
+                                <div className="pt-3 mt-3 border-t flex items-center justify-between">
+                                  <span className="text-[11px] text-muted-foreground">Tel: {m.phone}</span>
+                                  <Link href={`/elite/members/${m.id}`}>
+                                    <Button size="sm" variant="outline" className="h-7 text-xs gap-1 font-semibold text-primary">
+                                      <span>View Report</span>
+                                      <ExternalLink className="h-3 w-3" />
+                                    </Button>
+                                  </Link>
+                                </div>
+                              </Card>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
-                  </div>
+                  )}
                 </div>
               );
             })
