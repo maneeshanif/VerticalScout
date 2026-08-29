@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Compass, Loader2, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { UserRole } from "@/types";
+import { API_URL } from "@/lib/api";
 
 export default function RegisterPage() {
   const [fullName, setFullName] = useState("");
@@ -24,7 +25,7 @@ export default function RegisterPage() {
     setSubmitting(true);
 
     try {
-      const res = await fetch("http://localhost:8000/api/v1/auth/register", {
+      const res = await fetch(`${API_URL}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

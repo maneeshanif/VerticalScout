@@ -48,7 +48,7 @@ class Settings(BaseSettings):
     SENTRY_SEND_PII: bool = False   # Set True to capture prompt/response content in Sentry
 
     # CORS
-    CORS_ORIGINS: str = "http://localhost:3000"
+    CORS_ORIGINS: str = "http://localhost:3000,http://localhost:3001,https://vertical-scout.vercel.app"
 
     @property
     def cors_origins_list(self) -> List[str]:
