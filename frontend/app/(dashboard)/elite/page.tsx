@@ -5,29 +5,37 @@ import Link from "next/link";
 import { Member, Evaluation } from "@/types";
 import { fetchWithAuth } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 import {
-  Users,
-  Plus,
-  Search,
-  Sparkles,
-  ArrowRight,
-  CheckCircle2,
-  AlertCircle,
-  Clock,
-  Phone,
-  Briefcase,
-  Layers,
-  Flame,
-  ChevronRight,
-  TrendingUp,
-  Trash2,
-  Shield,
-  Edit,
+  Users, Plus, Search, Sparkles, CheckCircle2, AlertCircle,
+  Clock, Briefcase, Flame, ChevronRight, TrendingUp, Trash2,
+  Shield, ArrowUpRight, Bot, Target,
 } from "lucide-react";
+
+const StatCard = ({
+  icon: Icon,
+  label,
+  value,
+  color,
+}: {
+  icon: React.ElementType;
+  label: string;
+  value: string | number;
+  color: string;
+}) => (
+  <div className="bg-card rounded-xl border border-border/80 p-4 sm:p-5 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow">
+    <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center shrink-0", color)}>
+      <Icon className="h-5 w-5" />
+    </div>
+    <div className="min-w-0">
+      <div className="text-2xl font-extrabold text-foreground tabular-nums">{value}</div>
+      <div className="text-xs text-muted-foreground font-medium truncate">{label}</div>
+    </div>
+  </div>
+);
 
 export default function EliteDashboardPage() {
   const { user } = useAuth();
@@ -43,17 +51,11 @@ export default function EliteDashboardPage() {
         fetchWithAuth("/members"),
         fetchWithAuth("/evaluations"),
       ]);
-
-      if (membersRes.ok) {
-        const membersData = await membersRes.json();
-        setMembers(membersData);
-      }
-
+      if (membersRes.ok) setMembers(await membersRes.json());
       if (evalsRes.ok) {
         const evalsData: Evaluation[] = await evalsRes.json();
         const evalsMap: Record<number, Evaluation> = {};
         evalsData.forEach((ev) => {
-          // Keep latest evaluation per member
           if (!evalsMap[ev.member_id] || new Date(ev.created_at) > new Date(evalsMap[ev.member_id].created_at)) {
             evalsMap[ev.member_id] = ev;
           }
@@ -61,36 +63,23 @@ export default function EliteDashboardPage() {
         setEvaluations(evalsMap);
       }
     } catch (err) {
-      console.error("Failed to load members or evaluations", err);
+      console.error("Failed to load", err);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  useEffect(() => { loadData(); }, []);
 
-  const handleDeleteMember = async (e: React.MouseEvent, memberId: number, memberName: string) => {
+  const handleDelete = async (e: React.MouseEvent, id: number, name: string) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!confirm(`Delete candidate "${memberName}"?`)) return;
-
-    try {
-      const res = await fetchWithAuth(`/members/${memberId}`, {
-        method: "DELETE",
-      });
-      if (res.ok) {
-        setMembers((prev) => prev.filter((m) => m.id !== memberId));
-      } else {
-        alert("Failed to delete candidate.");
-      }
-    } catch (err) {
-      console.error("Delete failed", err);
-    }
+    if (!confirm(`Delete "${name}"?`)) return;
+    const res = await fetchWithAuth(`/members/${id}`, { method: "DELETE" });
+    if (res.ok) setMembers((p) => p.filter((m) => m.id !== id));
   };
 
-  const filteredMembers = members.filter(
+  const filtered = members.filter(
     (m) =>
       m.name.toLowerCase().includes(search.toLowerCase()) ||
       m.domain.toLowerCase().includes(search.toLowerCase()) ||
@@ -99,229 +88,196 @@ export default function EliteDashboardPage() {
 
   const evaluatedCount = Object.keys(evaluations).length;
   const eligibleCount = Object.values(evaluations).filter((e) => e.outcome === "eligible").length;
+  const isTeacherOrAdmin = user && user.role !== "elite_user";
 
-  const getOutcomeBadge = (outcome?: string | null) => {
+  const getOutcomeConfig = (outcome?: string | null) => {
     switch (outcome) {
-      case "eligible":
-        return (
-          <Badge variant="success" className="gap-1 font-semibold">
-            <CheckCircle2 className="h-3 w-3" />
-            Eligible Vertical
-          </Badge>
-        );
-      case "service_domain":
-        return (
-          <Badge variant="warning" className="gap-1 font-semibold">
-            <Clock className="h-3 w-3" />
-            Service Domain
-          </Badge>
-        );
-      case "parked":
-        return (
-          <Badge variant="parked" className="gap-1 font-semibold">
-            <AlertCircle className="h-3 w-3" />
-            Parked
-          </Badge>
-        );
-      default:
-        return (
-          <Badge variant="outline" className="text-muted-foreground border-dashed">
-            Not Evaluated
-          </Badge>
-        );
+      case "eligible":    return { label: "Eligible", color: "bg-emerald-50 text-emerald-700 border-emerald-200", dot: "bg-emerald-500" };
+      case "service_domain": return { label: "Service", color: "bg-amber-50 text-amber-700 border-amber-200", dot: "bg-amber-500" };
+      case "parked":      return { label: "Parked", color: "bg-slate-100 text-slate-600 border-slate-200", dot: "bg-slate-400" };
+      default:            return { label: "Pending", color: "bg-primary/6 text-primary border-primary/20 border-dashed", dot: "bg-primary/40" };
     }
   };
 
-  const isTeacherOrAdmin = user && user.role !== "elite_user";
-
   return (
-    <div className="space-y-6">
-      {/* Top Banner / Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 text-xs font-bold text-primary uppercase tracking-wider">
+    <div className="space-y-6 sm:space-y-7">
+      {/* ── Page header ── */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 text-xs font-semibold text-primary uppercase tracking-widest">
             {isTeacherOrAdmin ? (
-              <span className="flex items-center gap-1">
-                <Shield className="h-3.5 w-3.5" />
-                Global Platform Registry ({user?.role?.replace("_", " ")})
-              </span>
+              <><Shield className="h-3 w-3" /><span>Platform Registry · {user?.role?.replace(/_/g, " ")}</span></>
             ) : (
-              <span>Personal Workspace</span>
+              <><Target className="h-3 w-3" /><span>My Workspace</span></>
             )}
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight mt-0.5">
-            {isTeacherOrAdmin ? "All Candidate Members Registry" : "Scouting Workspace"}
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground">
+            {isTeacherOrAdmin ? "Candidate Registry" : "Scouting Workspace"}
           </h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground max-w-xl">
             {isTeacherOrAdmin
-              ? "Read, edit, delete, or trigger evaluations across all candidates collected by the assistant teacher cohort."
-              : "Collect candidate details, run 5-Step / 8-Test AI evaluations, and monitor beachhead viability."}
+              ? "Review, edit, and run AI evaluations across all candidates in the cohort."
+              : "Collect candidate details and run AI-powered vertical evaluations."}
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Link href="/elite/members/new">
-            <Button className="font-semibold shadow-sm gap-1.5 w-full sm:w-auto">
-              <Plus className="h-4 w-4" />
-              Add Member
-            </Button>
-          </Link>
+        <div className="flex items-center gap-2 shrink-0">
           <Link href="/elite/leaderboard">
-            <Button variant="outline" className="gap-1.5 hidden sm:inline-flex">
-              <TrendingUp className="h-4 w-4 text-amber-500" />
+            <Button variant="outline" size="sm" className="gap-1.5 h-9 text-xs hidden sm:inline-flex">
+              <TrendingUp className="h-3.5 w-3.5 text-amber-500" />
               Leaderboard
             </Button>
           </Link>
+          <Link href="/elite/members/new">
+            <Button size="sm" className="gap-1.5 h-9 text-xs font-semibold shadow-sm shadow-primary/20">
+              <Plus className="h-3.5 w-3.5" />
+              Add Candidate
+            </Button>
+          </Link>
         </div>
       </div>
 
-      {/* Metrics Row */}
+      {/* ── Stats row ── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-        <Card className="p-4 flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold">
-            <Users className="h-5 w-5" />
-          </div>
-          <div>
-            <div className="text-xl sm:text-2xl font-extrabold">{members.length}</div>
-            <div className="text-xs text-muted-foreground">
-              {isTeacherOrAdmin ? "Cohort Members" : "My Members"}
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-4 flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-purple-500/10 text-purple-600 flex items-center justify-center font-bold">
-            <Sparkles className="h-5 w-5" />
-          </div>
-          <div>
-            <div className="text-xl sm:text-2xl font-extrabold">{evaluatedCount}</div>
-            <div className="text-xs text-muted-foreground">Evaluated with AI</div>
-          </div>
-        </Card>
-
-        <Card className="p-4 flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center font-bold">
-            <CheckCircle2 className="h-5 w-5" />
-          </div>
-          <div>
-            <div className="text-xl sm:text-2xl font-extrabold">{eligibleCount}</div>
-            <div className="text-xs text-muted-foreground">Eligible Verticals</div>
-          </div>
-        </Card>
-
-        <Card className="p-4 flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center font-bold">
-            <Flame className="h-5 w-5" />
-          </div>
-          <div>
-            <div className="text-xl sm:text-2xl font-extrabold">
-              {members.length > 0 ? `${Math.round((evaluatedCount / members.length) * 100)}%` : "0%"}
-            </div>
-            <div className="text-xs text-muted-foreground">Evaluation Rate</div>
-          </div>
-        </Card>
+        <StatCard icon={Users} label={isTeacherOrAdmin ? "Total Candidates" : "My Candidates"} value={members.length} color="bg-primary/10 text-primary" />
+        <StatCard icon={Bot} label="AI Evaluated" value={evaluatedCount} color="bg-violet-100 text-violet-600" />
+        <StatCard icon={CheckCircle2} label="Eligible Verticals" value={eligibleCount} color="bg-emerald-100 text-emerald-600" />
+        <StatCard icon={Flame} label="Evaluation Rate" value={members.length > 0 ? `${Math.round((evaluatedCount / members.length) * 100)}%` : "0%"} color="bg-amber-100 text-amber-600" />
       </div>
 
-      {/* Search Bar */}
+      {/* ── Search ── */}
       <div className="relative">
-        <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="Filter candidate by name, domain, experience or phone number..."
+          placeholder="Search by name, domain, or phone…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="pl-9 bg-card text-sm h-10 shadow-sm"
+          className="pl-10 h-10 bg-card border-border/80 text-sm shadow-sm"
         />
+        {search && (
+          <button
+            onClick={() => setSearch("")}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground text-xs font-medium"
+          >
+            Clear
+          </button>
+        )}
       </div>
 
-      {/* Members Grid / List */}
+      {/* ── Candidate grid ── */}
       {loading ? (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <Card key={i} className="h-44 animate-pulse bg-muted/40" />
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="h-48 rounded-xl bg-muted/40 shimmer" />
           ))}
         </div>
-      ) : filteredMembers.length === 0 ? (
-        <Card className="p-12 text-center flex flex-col items-center justify-center gap-3 border-dashed">
-          <div className="h-12 w-12 rounded-2xl bg-muted flex items-center justify-center text-muted-foreground">
-            <Users className="h-6 w-6" />
+      ) : filtered.length === 0 ? (
+        <div className="flex flex-col items-center justify-center gap-4 py-20 text-center">
+          <div className="h-14 w-14 rounded-2xl bg-muted flex items-center justify-center">
+            <Users className="h-7 w-7 text-muted-foreground" />
           </div>
-          <div className="space-y-1">
-            <h3 className="font-bold text-base">No candidate members found</h3>
-            <p className="text-xs sm:text-sm text-muted-foreground max-w-sm">
-              {search ? "No members match your search criteria." : "Start scouting by adding your first student/candidate profile."}
+          <div>
+            <h3 className="font-bold text-base">
+              {search ? "No results found" : "No candidates yet"}
+            </h3>
+            <p className="text-sm text-muted-foreground mt-1 max-w-xs">
+              {search
+                ? "Try a different name, domain, or phone number."
+                : "Start scouting by adding your first candidate profile."}
             </p>
           </div>
           {!search && (
             <Link href="/elite/members/new">
-              <Button size="sm" className="gap-1.5 mt-2">
-                <Plus className="h-4 w-4" />
-                Add Candidate
+              <Button size="sm" className="gap-1.5 mt-1">
+                <Plus className="h-3.5 w-3.5" />
+                Add First Candidate
               </Button>
             </Link>
           )}
-        </Card>
+        </div>
       ) : (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredMembers.map((member) => {
-            const ev = evaluations[member.id];
-            return (
-              <Link key={member.id} href={`/elite/members/${member.id}`}>
-                <Card className="h-full hover:border-primary/40 hover:shadow-md transition-all flex flex-col justify-between group cursor-pointer border-border/80 relative">
-                  <CardHeader className="p-4 sm:p-5 pb-3">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="space-y-1">
-                        <CardTitle className="text-base group-hover:text-primary transition-colors flex items-center gap-1.5">
-                          {member.name}
-                        </CardTitle>
-                        <div className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                          <Briefcase className="h-3.5 w-3.5 text-primary/70" />
-                          <span className="font-semibold text-foreground/90">{member.domain}</span>
+        <>
+          <div className="flex items-center justify-between text-xs text-muted-foreground px-0.5">
+            <span><span className="font-semibold text-foreground">{filtered.length}</span> candidate{filtered.length !== 1 ? "s" : ""}{search ? " found" : ""}</span>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filtered.map((member) => {
+              const ev = evaluations[member.id];
+              const oc = getOutcomeConfig(ev?.outcome);
+              return (
+                <Link key={member.id} href={`/elite/members/${member.id}`}>
+                  <div className="group relative bg-card rounded-xl border border-border/80 overflow-hidden hover:border-primary/40 hover:shadow-lg hover:shadow-primary/8 transition-all duration-200 cursor-pointer flex flex-col h-full">
+                    {/* Card top accent bar */}
+                    <div className={cn(
+                      "h-1 w-full transition-all",
+                      ev?.outcome === "eligible" ? "bg-gradient-to-r from-emerald-400 to-emerald-500" :
+                      ev?.outcome === "service_domain" ? "bg-gradient-to-r from-amber-400 to-amber-500" :
+                      ev?.outcome === "parked" ? "bg-slate-300" :
+                      "bg-gradient-to-r from-primary/30 to-violet-400/30"
+                    )} />
+
+                    <div className="p-5 flex-1 flex flex-col gap-3.5">
+                      {/* Name & outcome badge */}
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="space-y-1 min-w-0">
+                          <h3 className="font-bold text-[15px] text-foreground group-hover:text-primary transition-colors leading-tight truncate">
+                            {member.name}
+                          </h3>
+                          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <Briefcase className="h-3 w-3 shrink-0 text-primary/60" />
+                            <span className="font-medium text-foreground/80 truncate">{member.domain}</span>
+                          </div>
+                        </div>
+                        <div className={cn(
+                          "flex items-center gap-1.5 text-[11px] font-semibold border rounded-full px-2 py-1 shrink-0 whitespace-nowrap",
+                          oc.color
+                        )}>
+                          <div className={cn("h-1.5 w-1.5 rounded-full", oc.dot)} />
+                          {oc.label}
                         </div>
                       </div>
-                      {getOutcomeBadge(ev?.outcome)}
-                    </div>
-                  </CardHeader>
 
-                  <CardContent className="p-4 sm:p-5 pt-0 space-y-2.5 text-xs text-muted-foreground flex-1">
-                    <div className="grid grid-cols-2 gap-2 pt-2 border-t text-xs">
-                      <div>
-                        <span className="text-muted-foreground/80 block text-[10px] uppercase font-semibold">Experience</span>
-                        <span className="font-medium text-foreground">{member.experience}</span>
+                      {/* Experience + contact */}
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs pt-3 border-t border-border/60">
+                        <div>
+                          <div className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground/70 mb-0.5">Experience</div>
+                          <div className="font-medium text-foreground/90 line-clamp-1">{member.experience}</div>
+                        </div>
+                        <div>
+                          <div className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground/70 mb-0.5">Contact</div>
+                          <div className="font-medium text-foreground/90">{member.phone}</div>
+                        </div>
                       </div>
-                      <div>
-                        <span className="text-muted-foreground/80 block text-[10px] uppercase font-semibold">Contact</span>
-                        <span className="font-medium text-foreground">{member.phone}</span>
-                      </div>
-                    </div>
 
-                    {ev?.screen_score !== undefined && ev?.screen_score !== null && (
-                      <div className="pt-2 border-t flex items-center justify-between font-mono text-[11px]">
-                        <span className="text-muted-foreground">Screen: {ev.screen_score.toFixed(1)}/10</span>
-                        <span className="text-muted-foreground">Tests: {ev.tests_score?.toFixed(1) || 0}/8.0</span>
-                      </div>
-                    )}
-                  </CardContent>
-
-                  <div className="px-4 sm:px-5 py-3 border-t bg-muted/20 flex items-center justify-between text-xs font-semibold text-primary">
-                    <div className="flex items-center gap-1.5">
-                      <span>{ev ? "View Evaluation Report" : "Run AI Domain Evaluation"}</span>
-                      <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                      {/* Scores */}
+                      {ev?.screen_score != null && (
+                        <div className="flex items-center gap-3 text-[11px] font-mono text-muted-foreground bg-muted/50 rounded-lg px-3 py-2">
+                          <span>Screen <span className="font-bold text-foreground">{ev.screen_score.toFixed(1)}</span>/10</span>
+                          <span className="text-border">·</span>
+                          <span>Tests <span className="font-bold text-foreground">{ev.tests_score?.toFixed(1) ?? "0.0"}</span>/8</span>
+                        </div>
+                      )}
                     </div>
 
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 -mr-2"
-                      onClick={(e) => handleDeleteMember(e, member.id, member.name)}
-                      title="Delete candidate"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
+                    {/* Card footer */}
+                    <div className="flex items-center justify-between px-5 py-3 border-t border-border/60 bg-muted/20">
+                      <span className="text-xs font-semibold text-primary flex items-center gap-1">
+                        {ev ? "View Report" : "Run Evaluation"}
+                        <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                      </span>
+                      <button
+                        onClick={(e) => handleDelete(e, member.id, member.name)}
+                        className="h-7 w-7 flex items-center justify-center rounded-md text-muted-foreground/50 hover:text-destructive hover:bg-destructive/10 transition-colors"
+                        title="Delete candidate"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
                   </div>
-                </Card>
-              </Link>
-            );
-          })}
-        </div>
+                </Link>
+              );
+            })}
+          </div>
+        </>
       )}
     </div>
   );

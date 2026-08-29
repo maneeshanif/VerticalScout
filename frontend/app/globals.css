@@ -4,88 +4,88 @@
 
 @layer base {
   :root {
-    /* Better Colors system - Light mode calibrated with oklch perceptual lightness mapped to clean HSL */
-    --background: 210 20% 98%;
-    --foreground: 222.2 84% 4.9%;
-
+    --background: 220 20% 98%;
+    --foreground: 224 71% 6%;
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
+    --card-foreground: 224 71% 6%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    /* Crisp Indigo / Violet primary interactive ramp */
-    --primary: 226 70% 55.5%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 25% 94%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 25% 94%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 25% 94%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --success: 142.1 70.6% 45.3%;
-    --success-foreground: 210 40% 98%;
-
+    --popover-foreground: 224 71% 6%;
+    --primary: 239 84% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 224 71% 6%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 48%;
+    --accent: 239 84% 96%;
+    --accent-foreground: 239 84% 40%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 142 71% 42%;
+    --success-foreground: 0 0% 100%;
     --warning: 38 92% 50%;
-    --warning-foreground: 48 96% 89%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 226 70% 55.5%;
-
-    --radius: 0.5rem;
+    --warning-foreground: 32 95% 14%;
+    --border: 220 13% 91%;
+    --input: 220 13% 94%;
+    --ring: 239 84% 60%;
+    --radius: 0.625rem;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 6.5%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 6.5%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --success: 142.1 70.6% 35.3%;
-    --success-foreground: 210 40% 98%;
-
+    --background: 224 71% 4%;
+    --foreground: 213 31% 91%;
+    --card: 224 58% 7%;
+    --card-foreground: 213 31% 91%;
+    --popover: 224 58% 7%;
+    --popover-foreground: 213 31% 91%;
+    --primary: 239 84% 65%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 223 47% 11%;
+    --secondary-foreground: 213 31% 91%;
+    --muted: 223 47% 11%;
+    --muted-foreground: 215 20% 55%;
+    --accent: 239 50% 18%;
+    --accent-foreground: 239 84% 72%;
+    --destructive: 0 63% 38%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 142 71% 35%;
+    --success-foreground: 0 0% 100%;
     --warning: 38 92% 45%;
-    --warning-foreground: 48 96% 89%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
+    --warning-foreground: 32 95% 90%;
+    --border: 223 47% 14%;
+    --input: 223 47% 12%;
+    --ring: 239 84% 60%;
   }
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
+  * { @apply border-border; }
   body {
     @apply bg-background text-foreground antialiased font-sans;
     min-height: 100vh;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
+  h1, h2, h3, h4, h5 { @apply tracking-tight; }
+}
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { @apply bg-border rounded-full; }
+::-webkit-scrollbar-thumb:hover { @apply bg-muted-foreground/30; }
+
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.page-in { animation: pageIn 0.22s ease-out both; }
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.shimmer {
+  background: linear-gradient(90deg,
+    hsl(var(--muted)) 25%, hsl(var(--secondary)) 50%, hsl(var(--muted)) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
 }
