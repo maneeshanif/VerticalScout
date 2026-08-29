@@ -32,3 +32,13 @@
 - User must provide `.env` with: DATABASE_URL (Supabase Cloud), SECRET_KEY, OPENAI_API_KEY, GEMINI_API_KEY (optional), SENTRY_DSN (optional)
 - User must run: `uv sync` then `uv run alembic upgrade head` to create DB tables
 - User must run: `uv run python -m app.runner create-super-admin` to create the first Super Admin account
+
+- 2026-08-29: **Agents SDK upgrade** — Replaced raw OpenAI/Gemini calls with OpenAI Agents SDK (`openai-agents[litellm]`):
+  - `vertical_evaluation_agent.py` — Full SDK rewrite: Agent + Runner.run() + Runner.run_streamed() + trace() context manager + flush_traces()
+  - `data_query_agent.py` — Full SDK rewrite with primary→fallback loop
+  - `agents/model.py` — LitellmModel factory for Gemini + OpenRouter
+  - `agents/config.py` — LiteLLM env var setup, PRIMARY_MODEL/FALLBACK_MODEL config
+  - `utils/sentry.py` — Added `OpenAIAgentsIntegration` (sentry-sdk[openai-agents] >= 2.31.0)
+  - `evaluations_router.py` — Added SSE streaming endpoint `/evaluations/{id}/run/stream`
+  - `pyproject.toml` — Updated deps: `openai-agents[litellm]`, `sentry-sdk[fastapi,openai-agents]>=2.31.0`
+  - `.env.example` — Updated with GEMINI_API_KEY, OPENROUTER_API_KEY, PRIMARY_MODEL, FALLBACK_MODEL

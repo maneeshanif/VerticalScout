@@ -212,3 +212,43 @@ The `vertical_evaluation_agent.py` MUST:
 **Phase 1: Backend Implementation**
 
 Status: Starting — read docs, create folder structure, implement backend, push to main.
+
+---
+
+## 🤖 Agent SDK Architecture (Updated)
+
+### Stack
+- **OpenAI Agents SDK** (`openai-agents[litellm]`) — handles agent loop, tracing, streaming
+- **LiteLLM** — routes to 100+ providers via unified interface  
+- **PRIMARY**: Gemini 2.0 Flash → `litellm/gemini/gemini-2.0-flash`
+- **FALLBACK**: OpenRouter Llama 3.1 (free) → `litellm/openrouter/meta-llama/llama-3.1-8b-instruct:free`
+- **Sentry** `OpenAIAgentsIntegration` (>= 2.31.0) — auto-captures agent_span, generation_span, tool_span
+
+### Agent Loop & Tracing
+- `Runner.run()` — standard async run with built-in tracing
+- `Runner.run_streamed()` — SSE streaming endpoint `/api/v1/evaluations/{id}/run/stream`
+- `trace("VerticalGate-Evaluation")` — groups primary+fallback attempts under one trace
+- `flush_traces()` — called after every run for immediate Sentry/OpenAI delivery
+- `RunConfig(workflow_name=..., max_turns=3, trace_include_sensitive_data=False)`
+
+### Provider Fallback
+```python
+# Primary fails → automatically falls back to secondary
+try: result = await Runner.run(agent_with_gemini, ...)
+except: result = await Runner.run(agent_with_openrouter, ...)
+```
+
+### Sentry Integration
+```python
+from sentry_sdk.integrations.openai_agents import OpenAIAgentsIntegration
+sentry_sdk.init(dsn=..., integrations=[OpenAIAgentsIntegration()])
+```
+Automatically captures: agent_span → generation_span → function_span per run.
+
+### Streaming SSE
+```
+GET /api/v1/evaluations/{member_id}/run/stream
+```
+Returns `text/event-stream` with:
+- `{"type": "delta", "text": "..."}` — LLM token
+- `{"type": "complete", "result": {...}}` — final structured JSON
