@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { Member, Evaluation } from "@/types";
 import { fetchWithAuth } from "@/lib/api";
+import { useAuth } from "@/lib/auth-context";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -24,9 +25,12 @@ import {
   ChevronRight,
   TrendingUp,
   Trash2,
+  Shield,
+  Edit,
 } from "lucide-react";
 
 export default function EliteDashboardPage() {
+  const { user } = useAuth();
   const [members, setMembers] = useState<Member[]>([]);
   const [evaluations, setEvaluations] = useState<Record<number, Evaluation>>({});
   const [search, setSearch] = useState("");
@@ -128,14 +132,30 @@ export default function EliteDashboardPage() {
     }
   };
 
+  const isTeacherOrAdmin = user && user.role !== "elite_user";
+
   return (
     <div className="space-y-6">
       {/* Top Banner / Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Scouting Workspace</h1>
+          <div className="flex items-center gap-2 text-xs font-bold text-primary uppercase tracking-wider">
+            {isTeacherOrAdmin ? (
+              <span className="flex items-center gap-1">
+                <Shield className="h-3.5 w-3.5" />
+                Global Platform Registry ({user?.role?.replace("_", " ")})
+              </span>
+            ) : (
+              <span>Personal Workspace</span>
+            )}
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight mt-0.5">
+            {isTeacherOrAdmin ? "All Candidate Members Registry" : "Scouting Workspace"}
+          </h1>
           <p className="text-sm text-muted-foreground">
-            Collect candidate details, run 5-Step / 8-Test AI evaluations, and monitor beachhead viability.
+            {isTeacherOrAdmin
+              ? "Read, edit, delete, or trigger evaluations across all candidates collected by the assistant teacher cohort."
+              : "Collect candidate details, run 5-Step / 8-Test AI evaluations, and monitor beachhead viability."}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -162,7 +182,9 @@ export default function EliteDashboardPage() {
           </div>
           <div>
             <div className="text-xl sm:text-2xl font-extrabold">{members.length}</div>
-            <div className="text-xs text-muted-foreground">Collected Members</div>
+            <div className="text-xs text-muted-foreground">
+              {isTeacherOrAdmin ? "Cohort Members" : "My Members"}
+            </div>
           </div>
         </Card>
 
@@ -194,7 +216,7 @@ export default function EliteDashboardPage() {
             <div className="text-xl sm:text-2xl font-extrabold">
               {members.length > 0 ? `${Math.round((evaluatedCount / members.length) * 100)}%` : "0%"}
             </div>
-            <div className="text-xs text-muted-foreground">Completion Rate</div>
+            <div className="text-xs text-muted-foreground">Evaluation Rate</div>
           </div>
         </Card>
       </div>
@@ -232,7 +254,7 @@ export default function EliteDashboardPage() {
             <Link href="/elite/members/new">
               <Button size="sm" className="gap-1.5 mt-2">
                 <Plus className="h-4 w-4" />
-                Add First Candidate
+                Add Candidate
               </Button>
             </Link>
           )}

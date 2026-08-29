@@ -15,8 +15,9 @@ import {
   Users,
   Menu,
   X,
-  Sun,
-  Moon,
+  Plus,
+  BarChart3,
+  Sliders,
 } from "lucide-react";
 
 export function Navbar() {
@@ -83,50 +84,46 @@ export function Navbar() {
         </div>
 
         {/* Desktop Nav */}
-        <nav className="hidden md:flex items-center gap-2">
-          {user.role === "elite_user" && (
-            <>
-              <Link href="/elite">
-                <Button variant="ghost" size="sm" className="gap-1.5">
-                  <Users className="h-4 w-4" />
-                  Members
-                </Button>
-              </Link>
-              <Link href="/elite/leaderboard">
-                <Button variant="ghost" size="sm" className="gap-1.5">
-                  <Trophy className="h-4 w-4 text-amber-500" />
-                  Leaderboard
-                </Button>
-              </Link>
-            </>
-          )}
+        <nav className="hidden md:flex items-center gap-1.5">
+          {/* Universal Candidate/Member Navigation for ALL ROLES */}
+          <Link href="/elite">
+            <Button variant="ghost" size="sm" className="gap-1.5">
+              <Users className="h-4 w-4" />
+              {user.role === "elite_user" ? "My Candidates" : "All Candidates"}
+            </Button>
+          </Link>
 
+          <Link href="/elite/members/new">
+            <Button variant="ghost" size="sm" className="gap-1.5 text-primary">
+              <Plus className="h-4 w-4" />
+              Add Candidate
+            </Button>
+          </Link>
+
+          <Link href="/elite/leaderboard">
+            <Button variant="ghost" size="sm" className="gap-1.5">
+              <Trophy className="h-4 w-4 text-amber-500" />
+              Leaderboard
+            </Button>
+          </Link>
+
+          {/* Role specific portals */}
           {user.role === "lead_teacher" && (
-            <>
-              <Link href="/lead-teacher">
-                <Button variant="ghost" size="sm" className="gap-1.5">
-                  <GraduationCap className="h-4 w-4" />
-                  My Elite Users
-                </Button>
-              </Link>
-              <Link href="/lead-teacher/leaderboard">
-                <Button variant="ghost" size="sm" className="gap-1.5">
-                  <Trophy className="h-4 w-4 text-amber-500" />
-                  Cohort Rank
-                </Button>
-              </Link>
-            </>
+            <Link href="/lead-teacher">
+              <Button variant="ghost" size="sm" className="gap-1.5">
+                <GraduationCap className="h-4 w-4" />
+                Teacher Portal
+              </Button>
+            </Link>
           )}
 
           {user.role === "super_teacher" && (
-            <>
-              <Link href="/super-teacher">
-                <Button variant="ghost" size="sm" className="gap-1.5">
-                  <GraduationCap className="h-4 w-4" />
-                  Super Oversight
-                </Button>
-              </Link>
-            </>
+            <Link href="/super-teacher">
+              <Button variant="ghost" size="sm" className="gap-1.5">
+                <GraduationCap className="h-4 w-4" />
+                Super Oversight
+              </Button>
+            </Link>
           )}
 
           {user.role === "super_admin" && (
@@ -134,13 +131,13 @@ export function Navbar() {
               <Link href="/admin">
                 <Button variant="ghost" size="sm" className="gap-1.5">
                   <Shield className="h-4 w-4" />
-                  System Stats
+                  Admin HQ
                 </Button>
               </Link>
               <Link href="/admin/users">
                 <Button variant="ghost" size="sm" className="gap-1.5">
-                  <Users className="h-4 w-4" />
-                  User & Roles
+                  <Sliders className="h-4 w-4" />
+                  Users & Roles
                 </Button>
               </Link>
             </>
@@ -179,43 +176,34 @@ export function Navbar() {
           </div>
 
           <div className="grid gap-1.5">
-            {user.role === "elite_user" && (
-              <>
-                <Link href="/elite" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="ghost" className="w-full justify-start gap-2">
-                    <Users className="h-4 w-4" />
-                    My Collected Members
-                  </Button>
-                </Link>
-                <Link href="/elite/members/new" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="default" className="w-full justify-start gap-2">
-                    + Add New Member
-                  </Button>
-                </Link>
-                <Link href="/elite/leaderboard" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="ghost" className="w-full justify-start gap-2">
-                    <Trophy className="h-4 w-4 text-amber-500" />
-                    Leaderboard
-                  </Button>
-                </Link>
-              </>
-            )}
+            <Link href="/elite" onClick={() => setMobileMenuOpen(false)}>
+              <Button variant="ghost" className="w-full justify-start gap-2">
+                <Users className="h-4 w-4" />
+                {user.role === "elite_user" ? "My Candidates" : "All Candidates"}
+              </Button>
+            </Link>
+
+            <Link href="/elite/members/new" onClick={() => setMobileMenuOpen(false)}>
+              <Button variant="default" className="w-full justify-start gap-2">
+                <Plus className="h-4 w-4" />
+                Add New Candidate
+              </Button>
+            </Link>
+
+            <Link href="/elite/leaderboard" onClick={() => setMobileMenuOpen(false)}>
+              <Button variant="ghost" className="w-full justify-start gap-2">
+                <Trophy className="h-4 w-4 text-amber-500" />
+                Leaderboard
+              </Button>
+            </Link>
 
             {user.role === "lead_teacher" && (
-              <>
-                <Link href="/lead-teacher" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="ghost" className="w-full justify-start gap-2">
-                    <GraduationCap className="h-4 w-4" />
-                    Assigned Elite Users
-                  </Button>
-                </Link>
-                <Link href="/lead-teacher/leaderboard" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="ghost" className="w-full justify-start gap-2">
-                    <Trophy className="h-4 w-4 text-amber-500" />
-                    Cohort Leaderboard
-                  </Button>
-                </Link>
-              </>
+              <Link href="/lead-teacher" onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start gap-2">
+                  <GraduationCap className="h-4 w-4" />
+                  Assigned Elite Users & AI
+                </Button>
+              </Link>
             )}
 
             {user.role === "super_teacher" && (
@@ -232,12 +220,12 @@ export function Navbar() {
                 <Link href="/admin" onClick={() => setMobileMenuOpen(false)}>
                   <Button variant="ghost" className="w-full justify-start gap-2">
                     <Shield className="h-4 w-4" />
-                    Admin Overview
+                    Admin Overview & Stats
                   </Button>
                 </Link>
                 <Link href="/admin/users" onClick={() => setMobileMenuOpen(false)}>
                   <Button variant="ghost" className="w-full justify-start gap-2">
-                    <Users className="h-4 w-4" />
+                    <Sliders className="h-4 w-4" />
                     Manage Users & Roles
                   </Button>
                 </Link>
