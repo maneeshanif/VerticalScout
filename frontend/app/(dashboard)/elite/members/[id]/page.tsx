@@ -4,9 +4,10 @@ import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Member, Evaluation, EvaluationFullResult } from "@/types";
 import { fetchWithAuth } from "@/lib/api";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import {
   ArrowLeft,
   Sparkles,
@@ -20,6 +21,10 @@ import {
   BookOpen,
   Zap,
   Briefcase,
+  Edit,
+  Trash2,
+  Save,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -32,6 +37,18 @@ export default function MemberDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
+  // Edit State
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editDomain, setEditDomain] = useState("");
+  const [editExperience, setEditExperience] = useState("");
+  const [editPhone, setEditPhone] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [savingEdit, setSavingEdit] = useState(false);
+
+  // Delete State
+  const [deleting, setDeleting] = useState(false);
+
   const loadData = async () => {
     try {
       setLoading(true);
@@ -43,6 +60,11 @@ export default function MemberDetailPage() {
       if (memberRes.ok) {
         const memberData = await memberRes.json();
         setMember(memberData);
+        setEditName(memberData.name);
+        setEditDomain(memberData.domain);
+        setEditExperience(memberData.experience);
+        setEditPhone(memberData.phone);
+        setEditDescription(memberData.description || "");
       } else {
         router.push("/elite");
       }
@@ -61,6 +83,58 @@ export default function MemberDetailPage() {
   useEffect(() => {
     if (id) loadData();
   }, [id]);
+
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingEdit(true);
+    setError(null);
+    try {
+      const res = await fetchWithAuth(`/members/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          name: editName,
+          domain: editDomain,
+          experience: editExperience,
+          phone: editPhone,
+          description: editDescription || null,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.detail || "Failed to update member details");
+      }
+
+      const updated = await res.json();
+      setMember(updated);
+      setIsEditing(false);
+    } catch (err: any) {
+      setError(err.message || "Update failed");
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!confirm(`Are you sure you want to permanently delete candidate "${member?.name}"?`)) {
+      return;
+    }
+    setDeleting(true);
+    try {
+      const res = await fetchWithAuth(`/members/${id}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        router.push("/elite");
+      } else {
+        const data = await res.json();
+        throw new Error(data.detail || "Failed to delete candidate");
+      }
+    } catch (err: any) {
+      alert(err.message || "Could not delete candidate");
+      setDeleting(false);
+    }
+  };
 
   const handleRunEvaluation = async () => {
     setEvaluating(true);
@@ -131,8 +205,8 @@ export default function MemberDetailPage() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
-      {/* Navigation */}
-      <div className="flex items-center justify-between">
+      {/* Navigation and Top Actions */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <Link href="/elite">
           <Button variant="ghost" size="sm" className="gap-1 text-muted-foreground">
             <ArrowLeft className="h-4 w-4" />
@@ -140,71 +214,174 @@ export default function MemberDetailPage() {
           </Button>
         </Link>
 
-        {getOutcomeBadge(latestEvaluation?.outcome)}
+        <div className="flex items-center gap-2">
+          {getOutcomeBadge(latestEvaluation?.outcome)}
+          {!isEditing && (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsEditing(true)}
+                className="gap-1 text-xs"
+              >
+                <Edit className="h-3.5 w-3.5" />
+                Edit
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                disabled={deleting}
+                onClick={handleDelete}
+                className="gap-1 text-xs"
+              >
+                {deleting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                Delete
+              </Button>
+            </>
+          )}
+        </div>
       </div>
 
-      {/* Candidate Profile Overview Card */}
-      <Card className="border-border/80 shadow-sm overflow-hidden">
-        <CardHeader className="bg-muted/15 border-b p-5 md:p-6">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <div className="text-xs uppercase tracking-wider font-semibold text-primary mb-1">
-                Candidate Member Record #{member.id}
+      {/* Candidate Profile / Edit Form */}
+      {isEditing ? (
+        <Card className="border-primary shadow-md">
+          <CardHeader className="bg-primary/5 border-b p-5">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-xl font-bold flex items-center gap-2">
+                <Edit className="h-5 w-5 text-primary" />
+                Edit Candidate Information
+              </CardTitle>
+              <Button variant="ghost" size="icon" onClick={() => setIsEditing(false)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <CardDescription className="text-xs">
+              Update candidate domain candidate information or contact specifics.
+            </CardDescription>
+          </CardHeader>
+          <form onSubmit={handleUpdate}>
+            <CardContent className="p-5 space-y-4">
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-foreground/80">Full Name *</label>
+                  <Input
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-foreground/80">Phone / WhatsApp *</label>
+                  <Input
+                    value={editPhone}
+                    onChange={(e) => setEditPhone(e.target.value)}
+                    required
+                  />
+                </div>
               </div>
-              <CardTitle className="text-2xl sm:text-3xl font-extrabold">{member.name}</CardTitle>
-              <CardDescription className="text-sm font-medium text-foreground/90 mt-1 flex items-center gap-1.5">
-                <Briefcase className="h-4 w-4 text-primary" />
-                <span>{member.domain}</span>
-              </CardDescription>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-foreground/80">Professional Domain *</label>
+                <Input
+                  value={editDomain}
+                  onChange={(e) => setEditDomain(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-foreground/80">Experience & Track Record *</label>
+                <Input
+                  value={editExperience}
+                  onChange={(e) => setEditExperience(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-foreground/80">Context Notes</label>
+                <textarea
+                  rows={3}
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                  className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                />
+              </div>
+            </CardContent>
+            <CardFooter className="flex items-center justify-between border-t p-4 bg-muted/10">
+              <Button type="button" variant="outline" size="sm" onClick={() => setIsEditing(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" size="sm" disabled={savingEdit} className="gap-1.5">
+                {savingEdit ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                Save Changes
+              </Button>
+            </CardFooter>
+          </form>
+        </Card>
+      ) : (
+        <Card className="border-border/80 shadow-sm overflow-hidden">
+          <CardHeader className="bg-muted/15 border-b p-5 md:p-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <div className="text-xs uppercase tracking-wider font-semibold text-primary mb-1">
+                  Candidate Member Record #{member.id}
+                </div>
+                <CardTitle className="text-2xl sm:text-3xl font-extrabold">{member.name}</CardTitle>
+                <CardDescription className="text-sm font-medium text-foreground/90 mt-1 flex items-center gap-1.5">
+                  <Briefcase className="h-4 w-4 text-primary" />
+                  <span>{member.domain}</span>
+                </CardDescription>
+              </div>
+
+              <Button
+                onClick={handleRunEvaluation}
+                disabled={evaluating}
+                size="lg"
+                className="font-bold shadow-md shadow-primary/20 gap-2 shrink-0"
+              >
+                {evaluating ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Running AI Agent...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4 text-amber-300" />
+                    {latestEvaluation ? "Re-Run Evaluation" : "Run AI Domain Evaluation"}
+                  </>
+                )}
+              </Button>
+            </div>
+          </CardHeader>
+
+          <CardContent className="p-5 md:p-6 grid sm:grid-cols-3 gap-4 text-xs sm:text-sm">
+            <div>
+              <span className="text-xs text-muted-foreground font-semibold block uppercase">Experience Track Record</span>
+              <span className="font-semibold text-foreground text-sm">{member.experience}</span>
+            </div>
+            <div>
+              <span className="text-xs text-muted-foreground font-semibold block uppercase">Contact Details</span>
+              <span className="font-semibold text-foreground text-sm">{member.phone}</span>
+            </div>
+            <div>
+              <span className="text-xs text-muted-foreground font-semibold block uppercase">Collected At</span>
+              <span className="font-semibold text-foreground text-sm">
+                {new Date(member.created_at).toLocaleDateString()}
+              </span>
             </div>
 
-            <Button
-              onClick={handleRunEvaluation}
-              disabled={evaluating}
-              size="lg"
-              className="font-bold shadow-md shadow-primary/20 gap-2 shrink-0"
-            >
-              {evaluating ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Running AI Agent...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="h-4 w-4 text-amber-300" />
-                  {latestEvaluation ? "Re-Run Evaluation" : "Run AI Domain Evaluation"}
-                </>
-              )}
-            </Button>
-          </div>
-        </CardHeader>
-
-        <CardContent className="p-5 md:p-6 grid sm:grid-cols-3 gap-4 text-xs sm:text-sm">
-          <div>
-            <span className="text-xs text-muted-foreground font-semibold block uppercase">Experience Track Record</span>
-            <span className="font-semibold text-foreground text-sm">{member.experience}</span>
-          </div>
-          <div>
-            <span className="text-xs text-muted-foreground font-semibold block uppercase">Contact Details</span>
-            <span className="font-semibold text-foreground text-sm">{member.phone}</span>
-          </div>
-          <div>
-            <span className="text-xs text-muted-foreground font-semibold block uppercase">Collected At</span>
-            <span className="font-semibold text-foreground text-sm">
-              {new Date(member.created_at).toLocaleDateString()}
-            </span>
-          </div>
-
-          {member.description && (
-            <div className="sm:col-span-3 pt-3 border-t text-xs sm:text-sm">
-              <span className="text-xs text-muted-foreground font-semibold block uppercase mb-1">Context Notes</span>
-              <p className="text-muted-foreground leading-relaxed bg-muted/20 p-3 rounded-lg border">
-                {member.description}
-              </p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            {member.description && (
+              <div className="sm:col-span-3 pt-3 border-t text-xs sm:text-sm">
+                <span className="text-xs text-muted-foreground font-semibold block uppercase mb-1">Context Notes</span>
+                <p className="text-muted-foreground leading-relaxed bg-muted/20 p-3 rounded-lg border">
+                  {member.description}
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Live Stream / Progress Banner */}
       {evaluating && (

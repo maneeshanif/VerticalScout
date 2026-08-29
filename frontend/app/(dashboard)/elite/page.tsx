@@ -23,6 +23,7 @@ import {
   Flame,
   ChevronRight,
   TrendingUp,
+  Trash2,
 } from "lucide-react";
 
 export default function EliteDashboardPage() {
@@ -65,6 +66,25 @@ export default function EliteDashboardPage() {
   useEffect(() => {
     loadData();
   }, []);
+
+  const handleDeleteMember = async (e: React.MouseEvent, memberId: number, memberName: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!confirm(`Delete candidate "${memberName}"?`)) return;
+
+    try {
+      const res = await fetchWithAuth(`/members/${memberId}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        setMembers((prev) => prev.filter((m) => m.id !== memberId));
+      } else {
+        alert("Failed to delete candidate.");
+      }
+    } catch (err) {
+      console.error("Delete failed", err);
+    }
+  };
 
   const filteredMembers = members.filter(
     (m) =>
@@ -223,7 +243,7 @@ export default function EliteDashboardPage() {
             const ev = evaluations[member.id];
             return (
               <Link key={member.id} href={`/elite/members/${member.id}`}>
-                <Card className="h-full hover:border-primary/40 hover:shadow-md transition-all flex flex-col justify-between group cursor-pointer border-border/80">
+                <Card className="h-full hover:border-primary/40 hover:shadow-md transition-all flex flex-col justify-between group cursor-pointer border-border/80 relative">
                   <CardHeader className="p-4 sm:p-5 pb-3">
                     <div className="flex items-start justify-between gap-2">
                       <div className="space-y-1">
@@ -260,8 +280,20 @@ export default function EliteDashboardPage() {
                   </CardContent>
 
                   <div className="px-4 sm:px-5 py-3 border-t bg-muted/20 flex items-center justify-between text-xs font-semibold text-primary">
-                    <span>{ev ? "View Evaluation Report" : "Run AI Domain Evaluation"}</span>
-                    <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    <div className="flex items-center gap-1.5">
+                      <span>{ev ? "View Evaluation Report" : "Run AI Domain Evaluation"}</span>
+                      <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    </div>
+
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 -mr-2"
+                      onClick={(e) => handleDeleteMember(e, member.id, member.name)}
+                      title="Delete candidate"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
                   </div>
                 </Card>
               </Link>
