@@ -32,8 +32,8 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str = ""                              # Optional (for tracing)
 
     # LiteLLM model strings
-    PRIMARY_MODEL: str = "litellm/gemini/gemini-2.0-flash"
-    FALLBACK_MODEL: str = "litellm/openrouter/meta-llama/llama-3.1-8b-instruct:free"
+    PRIMARY_MODEL: str = "litellm/gemini/gemini-2.5-flash"
+    FALLBACK_MODEL: str = "litellm/openrouter/meta-llama/llama-3.1-8b-instruct"
 
     # Disable SDK's built-in OpenAI tracing when not using OpenAI models
     # Set to "1" if you don't want traces sent to OpenAI platform
