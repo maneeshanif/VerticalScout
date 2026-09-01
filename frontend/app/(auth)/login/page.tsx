@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
+import { API_URL } from "@/lib/api";
 import { Compass, ArrowRight, Eye, EyeOff } from "lucide-react";
 
 const V = { viridian: "#0E5C4A", viridianLt: "#E6F3EF", ink: "#1A1F2E", muted: "#6E7280", border: "#E8E5DF", canvas: "#FAFAF7" };
@@ -24,38 +25,60 @@ export default function LoginPage() {
     setError(null);
     setLoading(true);
     try {
-      const res = await fetch(process.env.NEXT_PUBLIC_API_URL + "/auth/login", {
+      const res = await fetch(API_URL + "/auth/login", {
         method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({ username: email, password }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim().toLowerCase(), password }),
       });
+      
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.detail || "Invalid credentials");
+        let errorMsg = "Invalid email or password";
+        if (data.detail) {
+          errorMsg = Array.isArray(data.detail) ? data.detail[0].msg : data.detail;
+        }
+        throw new Error(errorMsg);
       }
-      const data = await res.json();
-      await login({ access_token: data.access_token, refresh_token: data.refresh_token });
       
-      // User data will be loaded by context, we just redirect.
-      // We need to fetch the user to know the role for redirect.
-      const meRes = await fetch(process.env.NEXT_PUBLIC_API_URL + "/auth/me", {
-        headers: { Authorization: `Bearer ${data.access_token}` }
-      });
-      const user = await meRes.json();
+      const tokens = await res.json();
+      const user = await login({ access_token: tokens.access_token, refresh_token: tokens.refresh_token });
       
-      if (user.role === "super_admin") router.push("/admin");
-      else if (user.role === "super_teacher") router.push("/super-teacher");
-      else if (user.role === "lead_teacher") {
-        if (!user.batch) router.push("/select-batch");
-        else router.push("/lead-teacher");
-      } else {
-        if (!user.batch) router.push("/select-batch");
-        else router.push("/elite");
+      if (!user) {
+        // Fallback fetch directly if state update was still resolving
+        const meRes = await fetch(API_URL + "/auth/me", {
+          headers: { Authorization: `Bearer ${tokens.access_token}` }
+        });
+        if (meRes.ok) {
+          const directUser = await meRes.json();
+          redirectForRole(directUser);
+          return;
+        }
+        throw new Error("Unable to load user profile. Please try again.");
       }
+      
+      redirectForRole(user);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Invalid credentials");
+      setError(err instanceof Error ? err.message : "Invalid email or password");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const redirectForRole = (u: any) => {
+    if (!u || !u.role) {
+      router.push("/elite");
+      return;
+    }
+    if (u.role === "super_admin") {
+      router.push("/admin");
+    } else if (u.role === "super_teacher") {
+      router.push("/super-teacher");
+    } else if (u.role === "lead_teacher") {
+      if (!u.batch) router.push("/select-batch");
+      else router.push("/lead-teacher");
+    } else {
+      if (!u.batch) router.push("/select-batch");
+      else router.push("/elite");
     }
   };
 

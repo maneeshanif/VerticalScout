@@ -8,10 +8,10 @@ import { useRouter } from "next/navigation";
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (tokens: { access_token: string; refresh_token: string }) => Promise<void>;
+  login: (tokens: { access_token: string; refresh_token: string }) => Promise<User | null>;
   logout: () => void;
   updateBatch: (batch: BatchType) => Promise<void>;
-  refreshUser: () => Promise<void>;
+  refreshUser: () => Promise<User | null>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -21,22 +21,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  const refreshUser = async () => {
+  const refreshUser = async (): Promise<User | null> => {
     try {
+      const token = typeof window !== "undefined" ? localStorage.getItem("vertical_access_token") : null;
+      if (!token) {
+        setUser(null);
+        setLoading(false);
+        return null;
+      }
       const res = await fetchWithAuth("/auth/me");
       if (res.ok) {
-        const userData = await res.json();
+        const userData: User = await res.json();
         setUser(userData);
+        return userData;
       } else {
         setUser(null);
         if (typeof window !== "undefined") {
           localStorage.removeItem("vertical_access_token");
           localStorage.removeItem("vertical_refresh_token");
         }
+        return null;
       }
     } catch (err) {
       console.error("Failed to fetch user profile", err);
       setUser(null);
+      return null;
     } finally {
       setLoading(false);
     }
@@ -46,10 +55,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     refreshUser();
   }, []);
 
-  const login = async (tokens: { access_token: string; refresh_token: string }) => {
-    localStorage.setItem("vertical_access_token", tokens.access_token);
-    localStorage.setItem("vertical_refresh_token", tokens.refresh_token);
-    await refreshUser();
+  const login = async (tokens: { access_token: string; refresh_token: string }): Promise<User | null> => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("vertical_access_token", tokens.access_token);
+      localStorage.setItem("vertical_refresh_token", tokens.refresh_token);
+    }
+    return await refreshUser();
   };
 
   const logout = () => {

@@ -6,13 +6,14 @@ import { UserRole } from "@/types";
 import { API_URL } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Compass, Loader2, ArrowRight, ShieldCheck, CheckCircle2 } from "lucide-react";
+import { Compass, Loader2, ArrowRight, ShieldCheck, CheckCircle2, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 
 export default function RegisterPage() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState<UserRole>("elite_user");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -156,14 +157,28 @@ export default function RegisterPage() {
               <label className="text-xs font-bold text-[#141C24] dark:text-white block">
                 Password
               </label>
-              <Input
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="h-10 text-sm bg-white dark:bg-[#14202D] border-[#E8E2D8] dark:border-[#233140] rounded-lg"
-              />
+              <div className="relative">
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="h-10 text-sm bg-white dark:bg-[#14202D] border-[#E8E2D8] dark:border-[#233140] rounded-lg pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1 transition-colors"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
             </div>
 
             <div className="space-y-1.5">

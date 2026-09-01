@@ -4,6 +4,7 @@ import React, { useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/shared/navbar";
+import { CommandMenu } from "@/components/shared/command-menu";
 import { Loader2 } from "lucide-react";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -37,6 +38,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      <CommandMenu />
       <Navbar />
       <main className="flex-1 container max-w-7xl mx-auto px-4 sm:px-6 py-7">
         <div className="page-in">

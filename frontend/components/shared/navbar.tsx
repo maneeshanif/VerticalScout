@@ -91,8 +91,8 @@ const ROLE_COLORS: Record<string, string> = {
   elite_user: "bg-stone-500/10 text-stone-700 border-stone-200 dark:bg-stone-800/40 dark:text-stone-300 dark:border-stone-700",
 };
 
-const formatRole = (role: string) =>
-  role.split("_").map((w) => w[0].toUpperCase() + w.slice(1)).join(" ");
+const formatRole = (role?: string) =>
+  role ? role.split("_").map((w) => w[0].toUpperCase() + w.slice(1)).join(" ") : "User";
 
 export function Navbar() {
   const { user, logout } = useAuth();
@@ -101,8 +101,10 @@ export function Navbar() {
 
   if (!user) return null;
 
+  const userRole = user.role || "elite_user";
+
   const visibleItems = NAV_ITEMS.filter(
-    (item) => !item.roles || item.roles.includes(user.role)
+    (item) => !item.roles || item.roles.includes(userRole)
   );
 
   const isActive = (href: string) => {
@@ -118,7 +120,7 @@ export function Navbar() {
         <div className="container flex h-14 items-center justify-between gap-4 max-w-7xl mx-auto px-4 sm:px-6">
           {/* Brand */}
           <Link
-            href={user.role === "super_admin" ? "/admin" : user.role === "lead_teacher" ? "/lead-teacher" : "/elite"}
+            href={userRole === "super_admin" ? "/admin" : userRole === "super_teacher" ? "/super-teacher" : userRole === "lead_teacher" ? "/lead-teacher" : "/elite"}
             className="flex items-center gap-2.5 shrink-0 group"
           >
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-white shadow shadow-primary/30 group-hover:shadow-primary/50 transition-shadow">
@@ -171,10 +173,10 @@ export function Navbar() {
             <div
               className={cn(
                 "hidden sm:flex items-center gap-1.5 text-[11px] font-semibold border rounded-full px-2.5 py-1",
-                ROLE_COLORS[user.role] || "bg-slate-100 text-slate-600 border-slate-200"
+                ROLE_COLORS[userRole] || "bg-slate-100 text-slate-600 border-slate-200"
               )}
             >
-              <span>{formatRole(user.role)}</span>
+              <span>{formatRole(userRole)}</span>
               {user.batch && (
                 <>
                   <span className="text-current/40">·</span>
@@ -229,9 +231,9 @@ export function Navbar() {
               </div>
               <div className={cn(
                 "ml-auto text-[11px] font-semibold border rounded-full px-2 py-0.5",
-                ROLE_COLORS[user.role] || "bg-slate-100 text-slate-600 border-slate-200"
+                ROLE_COLORS[userRole] || "bg-slate-100 text-slate-600 border-slate-200"
               )}>
-                {formatRole(user.role)}
+                {formatRole(userRole)}
               </div>
             </div>
 
