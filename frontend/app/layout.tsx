@@ -3,18 +3,14 @@ import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
 
 export const metadata: Metadata = {
-  title: "VerticalGate — Elite Member Collection & Vertical Evaluation",
-  description: "AI-Powered Domain & Vertical Evaluation Platform for 110 Elite Assistant Teachers.",
+  title: "VerticalGate — Venture Domain Qualification Engine",
+  description: "AI-Powered startup vertical qualification for 110 student scouts. 3 Launch Rules, 6 Selling Screens, 8 Fatal-Flaw Tests.",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-background font-sans antialiased text-foreground flex flex-col">
+      <body className="min-h-screen bg-[#FAFAF7] text-[#1A1F2E] antialiased flex flex-col">
         <AuthProvider>
           {children}
         </AuthProvider>

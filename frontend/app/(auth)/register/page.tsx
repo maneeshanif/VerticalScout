@@ -2,13 +2,12 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Compass, Loader2, ArrowRight } from "lucide-react";
-import Link from "next/link";
 import { UserRole } from "@/types";
 import { API_URL } from "@/lib/api";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Compass, Loader2, ArrowRight, ShieldCheck, CheckCircle2 } from "lucide-react";
+import Link from "next/link";
 
 export default function RegisterPage() {
   const [fullName, setFullName] = useState("");
@@ -50,111 +49,168 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-4 sm:p-6 bg-gradient-to-b from-background via-slate-50/50 to-slate-100/80 dark:from-background dark:to-slate-950">
-      <div className="w-full max-w-md space-y-6">
-        <div className="flex flex-col items-center text-center space-y-2">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-md shadow-primary/20">
-            <Compass className="h-6 w-6" />
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-            Vertical<span className="text-primary">Gate</span>
-          </h1>
-          <p className="text-sm text-muted-foreground max-w-xs">
-            Register your Assistant Teacher / Scout account
-          </p>
+    <div className="min-h-screen flex bg-[#FAF7F2] dark:bg-[#0B121A]">
+      {/* Left Brand Panel */}
+      <div className="hidden lg:flex lg:w-[48%] relative bg-[#0D6E61] flex-col justify-between p-12 text-white overflow-hidden">
+        {/* Logo */}
+        <div className="relative">
+          <Link href="/" className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/15 backdrop-blur border border-white/20">
+              <Compass className="h-5 w-5 text-white" />
+            </div>
+            <span className="font-display text-white font-bold text-xl tracking-tight">VerticalGate</span>
+          </Link>
         </div>
 
-        <Card className="border-border/80 shadow-lg shadow-slate-200/50 dark:shadow-none">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-xl font-bold">Create Account</CardTitle>
-            <CardDescription className="text-xs sm:text-sm">
-              Enter your details to register in the scouting portal
-            </CardDescription>
-          </CardHeader>
-          <form onSubmit={handleRegister}>
-            <CardContent className="space-y-4">
-              {error && (
-                <div className="p-3 rounded-lg text-xs font-medium bg-destructive/15 text-destructive border border-destructive/20 animate-in fade-in">
-                  {error}
-                </div>
+        {/* Value Prop */}
+        <div className="relative space-y-6 max-w-md">
+          <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-1 text-xs font-semibold text-[#A7F3D0] backdrop-blur border border-white/10">
+            <span>Join 110 Active Field Scouts</span>
+          </div>
+
+          <h2 className="font-display text-3xl font-extrabold leading-snug">
+            Scout, Screen, and Launch High-Margin Startups.
+          </h2>
+
+          <p className="text-sm text-[#D1FAE5] leading-relaxed">
+            Create an account to join your assigned cohort shift. Collect student founder domain proposals and trigger AI evaluations.
+          </p>
+
+          <div className="space-y-3 pt-2 text-xs text-[#E6F4EA]">
+            <div className="flex items-center gap-2.5">
+              <CheckCircle2 className="h-4 w-4 text-[#A7F3D0] shrink-0" />
+              <span>Real-time domain qualification against 8 fatal tests</span>
+            </div>
+            <div className="flex items-center gap-2.5">
+              <CheckCircle2 className="h-4 w-4 text-[#A7F3D0] shrink-0" />
+              <span>Shift leaderboard rankings across Morning, Afternoon, Evening</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Footnote */}
+        <div className="relative text-xs text-[#A7F3D0]/80">
+          VerticalGate &bull; Panaversity AI Agent Factory
+        </div>
+      </div>
+
+      {/* Right Form Panel */}
+      <div className="flex-1 flex items-center justify-center p-6 sm:p-12">
+        <div className="w-full max-w-md space-y-6">
+          {/* Mobile Logo */}
+          <div className="lg:hidden flex items-center gap-2.5 mb-2">
+            <div className="h-9 w-9 rounded-lg bg-[#0D6E61] text-white flex items-center justify-center">
+              <Compass className="h-5 w-5" />
+            </div>
+            <span className="font-display font-bold text-lg text-[#141C24] dark:text-white">VerticalGate</span>
+          </div>
+
+          <div className="space-y-1.5">
+            <h1 className="font-display text-2xl font-bold text-[#141C24] dark:text-white">
+              Create Scout Account
+            </h1>
+            <p className="text-xs text-[#706E6B] dark:text-[#8FA0B3]">
+              Join the institutional vertical qualification network.
+            </p>
+          </div>
+
+          {error && (
+            <div
+              role="alert"
+              aria-live="assertive"
+              className="p-3.5 rounded-lg bg-[#FFF1F2] border border-[#FECDD3] text-xs font-bold text-[#BE123C] dark:bg-[#4C0519]/30 dark:border-[#881337] dark:text-[#FECDD3]"
+            >
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleRegister} className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-[#141C24] dark:text-white block">
+                Full Name
+              </label>
+              <Input
+                placeholder="e.g. Alex Rivera"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                required
+                className="h-10 text-sm bg-white dark:bg-[#14202D] border-[#E8E2D8] dark:border-[#233140] rounded-lg"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-[#141C24] dark:text-white block">
+                Email Address
+              </label>
+              <Input
+                type="email"
+                placeholder="name@organization.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="h-10 text-sm bg-white dark:bg-[#14202D] border-[#E8E2D8] dark:border-[#233140] rounded-lg"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-[#141C24] dark:text-white block">
+                Password
+              </label>
+              <Input
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="h-10 text-sm bg-white dark:bg-[#14202D] border-[#E8E2D8] dark:border-[#233140] rounded-lg"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-[#141C24] dark:text-white block">
+                Account Role
+              </label>
+              <select
+                value={role}
+                onChange={(e) => setRole(e.target.value as UserRole)}
+                className="flex h-10 w-full rounded-lg border border-[#E8E2D8] bg-white px-3 py-2 text-xs font-semibold text-[#141C24] dark:border-[#233140] dark:bg-[#14202D] dark:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0D6E61]"
+              >
+                <option value="elite_user">Assistant Teacher (Elite Scout)</option>
+                <option value="lead_teacher">Lead Teacher (Shift Supervisor)</option>
+                <option value="super_teacher">Super Teacher (Venture Director)</option>
+              </select>
+            </div>
+
+            <Button
+              type="submit"
+              disabled={submitting}
+              className="w-full h-11 bg-[#0D6E61] hover:bg-[#095248] text-white font-bold rounded-lg shadow-md shadow-[#0D6E61]/20 gap-2"
+            >
+              {submitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Creating Account…</span>
+                </>
+              ) : (
+                <>
+                  <span>Create Account</span>
+                  <ArrowRight className="h-4 w-4" />
+                </>
               )}
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-foreground/80">Full Name</label>
-                <Input
-                  type="text"
-                  placeholder="e.g. Alex Morgan"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  required
-                  className="bg-background text-sm"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-foreground/80">Email address</label>
-                <Input
-                  type="email"
-                  placeholder="name@organization.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="bg-background text-sm"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-foreground/80">Password</label>
-                <Input
-                  type="password"
-                  placeholder="Minimum 8 characters"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={8}
-                  className="bg-background text-sm"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-foreground/80">Designated Role</label>
-                <select
-                  value={role}
-                  onChange={(e) => setRole(e.target.value as UserRole)}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  <option value="elite_user">Elite User (Scout / Assistant Teacher)</option>
-                  <option value="lead_teacher">Lead Teacher</option>
-                  <option value="super_teacher">Super Teacher</option>
-                  <option value="super_admin">Super Admin</option>
-                </select>
-              </div>
-            </CardContent>
-
-            <CardFooter className="flex flex-col space-y-3">
-              <Button type="submit" className="w-full font-medium" disabled={submitting}>
-                {submitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Creating Profile...
-                  </>
-                ) : (
-                  <>
-                    Register
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </>
-                )}
-              </Button>
-
-              <div className="text-center text-xs text-muted-foreground pt-1">
-                Already registered?{" "}
-                <Link href="/login" className="font-semibold text-primary hover:underline">
-                  Sign in here
-                </Link>
-              </div>
-            </CardFooter>
+            </Button>
           </form>
-        </Card>
+
+          <div className="pt-4 border-t border-[#E8E2D8] dark:border-[#233140] text-center text-xs text-[#706E6B] dark:text-[#8FA0B3]">
+            Already have an account?{" "}
+            <Link href="/login" className="font-bold text-[#0D6E61] hover:underline dark:text-[#2DD4BF]">
+              Sign In
+            </Link>
+            <span className="mx-2">&bull;</span>
+            <Link href="/" className="hover:underline">
+              Back to Home
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   );

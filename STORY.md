@@ -1,231 +1,73 @@
-Here is the complete, updated version with the roles and flows you described integrated cleanly:
+# Product Story & User Flows
+
+We are Assistant Teachers (Elite Users), around 110 people in total, working alongside around 8–10 Lead Teachers, approximately 5 Super Teachers, and 1 Super Admin.
+
+Our mission is to approach students (Members) and collect their profile details—specifically which domain/vertical idea they are working in, their experience level, name, phone number, and context.
+
+Using the authoritative "Choosing Your Vertical" framework (three rules, five steps, eight tests, beachhead selection, honest exits, and four validation gates), an AI evaluation agent analyzes each domain to determine if it is eligible ("Good to Go") for startup incubation, a service domain, or parked.
 
 ---
-
-We are Assistant Teachers, around 110 people in total, and we will have around 8 Teachers, along with one Head Teacher / Super Teacher.
-
-Our Teacher has given us a task: we need to approach normal students and collect their details, such as which domain they work in, how much experience they have, their name, and their phone number.
-
-The other important part is that I will provide you with some content from a book. We will later use this content to finalize/evaluate their vertical. The content explains how we can evaluate a vertical using 4 steps, 8 tests, specific goals, and other criteria. You will understand the complete evaluation framework from the content I provide later. Based on that framework, we will determine whether a particular domain is actually beneficial and worth pursuing or not.
-
-All of the students will have to complete this task — around 110 students in total.
 
 ### Technology Stack
 
-My plan is to build this application using my own tech stack:
-
-- **Frontend**: Next.js  
-- **Styling**: Tailwind CSS  
-- **Backend**: FastAPI  
-- **AI**: OpenAI Agent SDK for simple AI agents (we can discuss details later)  
-- **Database**: Supabase PostgreSQL  
-- **Authentication**: Simple email verification initially (Google OAuth and OTP can be added later)  
-- **Monitoring/Logging**: Sentry for application and AI logs  
-
-### User Roles & Hierarchy
-
-The application will have the following roles in this clear hierarchy:
-
-**Super Admin → Super Teacher → Lead Teacher → Elite User → Member**
-
-1. **Super Admin** (Me)  
-   Full system control and oversight.
-
-2. **Super Teacher**  
-   Selected / asked during the login flow.  
-   Has high-level visibility over Lead Teachers and everything under them.
-
-3. **Lead Teacher**  
-   Similar to Elite Users in flow: after logging in, the Lead Teacher must select their batch/shift:  
-   - Morning  
-   - Afternoon  
-   - Evening  
-
-   After selecting the shift, the rest of the Lead Teacher dashboard and features become available.
-
-4. **Elite User** (≈110 people)  
-   The students responsible for collecting data from normal students (Members).
-
-5. **Member**  
-   Normal students whose data is collected.
-
-### Elite User Flow
-
-When an Elite User logs in, they must select which batch they belong to:
-
-- Morning  
-- Afternoon  
-- Evening  
-
-After selecting the batch, they can proceed.
-
-Each Elite User should have a **Plus (+)** button to add/collect a new Member.
-
-They will enter:
-
-- Name  
-- Domain  
-- Experience  
-- Phone Number  
-- Description (optional)  
-- Any other required fields  
-
-Once saved, the Member is permanently associated with that Elite User’s account.
-
-### AI Analysis (for Elite Users)
-
-After saving a Member, the Elite User can run the AI Agent.
-
-The AI Agent evaluates the Member’s domain/vertical using the evaluation framework content I will provide later (4 steps, 8 tests, goals, criteria, etc.).
-
-The AI output should include:
-
-- Summary  
-- Where the domain is suitable  
-- Where it is not suitable  
-- Why it is not suitable  
-- Areas that need improvement  
-- How those areas can be improved  
-- Overall evaluation  
-- Reasons why the domain is suitable (if it is)  
-- Reasons why the domain is not suitable (if it is not)
-
-This feature can be called **AI Analysis**.
-
-Elite Users can:
-
-- View all their collected Members as cards/widgets on the dashboard  
-- Open any Member’s detail page to see full details + AI Analysis / summary  
-- See their own performance on the Elite Leaderboard  
-
-### Elite Leaderboard
-
-There will be a competition among Elite Users based on:
-
-- Number of Members collected  
-- Number of authentic Members  
-- Overall performance quality  
-
-Each Elite User can see their own ranking and performance.
-
-### Lead Teacher Flow
-
-After logging in and selecting Morning / Afternoon / Evening, a Lead Teacher can see:
-
-- All Elite Users assigned to them  
-- How many Members each Elite User has collected  
-- Each Elite User’s performance  
-- Elite User leaderboard (under them)  
-- Collected Member data  
-- AI analysis results  
-
-They get a detailed overview of everything under their responsibility.
-
-### Super Teacher
-
-The Super Teacher (selected during login) has access to:
-
-- All Lead Teachers  
-- How many Elite Users are under each Lead Teacher  
-- How many Members each Lead Teacher’s Elite Users have collected  
-- Teacher-wise leaderboard  
-- Elite-wise leaderboard  
-- Overall performance metrics  
-
-### Super Admin (Me)
-
-Complete control over the entire system:
-
-- Total users and login activity  
-- Super Teachers, Lead Teachers, Elite Users, Members  
-- User roles and details  
-- User activity logs  
-- Full CRUD operations  
-- Assign / change user roles  
-- Create, update, delete users  
-- Overall system data and configuration  
-
-### AI Features for Higher Roles
-
-Teachers (Lead Teachers), Super Teachers, and Super Admin should eventually have an AI assistant that can answer questions about the data, for example:
-
-- Which Elite User has poor performance?  
-- Which Elite User has collected the most authentic Members?  
-- Which Elite Users have Members in more suitable domains?  
-
-**Rate Limits (configurable by Super Admin):**
-
-- Elite Users: e.g. 10 AI API calls per day (auto-resets daily)  
-- Lead Teachers: e.g. 5 AI calls per 30 minutes (initially)  
-
-These limits should be configurable from the Super Admin panel.
-
-### AI Provider Strategy
-
-We need one primary AI provider + one automatic fallback.
-
-I will decide the final primary + fallback combination during architecture finalization (Gemini vs Agent Router, etc.).
-
-The AI Agent must strictly use the domain/vertical evaluation content I will provide later.  
-Tavily can be used when external/current web research is required.
-
-### Logging & Monitoring
-
-Use Sentry for:
-
-- Application errors  
-- AI failures  
-- API errors  
-- User actions  
-- Agent execution issues  
-
-Maintain detailed AI Agent execution logs:
-
-- Which Member was analyzed  
-- Who triggered the Agent  
-- Timestamp  
-- Result / success-failure status  
-- Error details (if any)  
-- AI provider used  
-- API usage  
-
-### Authentication
-
-Keep the first version simple and fast:
-
-- Proper email verification  
-- OTP and Google OAuth can be added later  
-
-### UI/UX Requirements
-
-- Mobile-first  
-- Clean, professional, modern, simple  
-- Light color palette with proper color theory (avoid overusing dark blue, green, or random colors)  
-- Consistent visual language  
-- Easy navigation  
-- Dashboards that make Members, performance, AI analysis, and rankings instantly clear  
-
-### Development Constraint
-
-I want the **initial version** ready in only **2 hours**.
-
-Therefore:
-
-- Keep the first version focused and MVP-style  
-- Architecture should still be future-proof and scalable  
-- Main focus order:  
-  **Member Data Collection → AI Domain Evaluation → Elite Dashboard → Leaderboards → Lead Teacher / Super Teacher Monitoring → Super Admin Management**
-
-The actual domain/vertical evaluation content will be provided next. That content will become the foundation for the AI Agent’s evaluation logic.
+- **Frontend**: Next.js 14 (App Router) + Tailwind CSS + shadcn/ui
+- **Backend**: FastAPI + SQLAlchemy + Alembic
+- **Database**: Supabase Cloud PostgreSQL
+- **AI Engine**: Primary + Automatic Fallback (OpenAI / Gemini / Tavily)
+- **Authentication**: Simple JWT / email verification for v1
+- **Monitoring/Logging**: Sentry + comprehensive AI execution logs
 
 ---
 
-This version now clearly includes:
+### User Roles, Hierarchy & Visibility
 
-- Super Admin (you)  
-- Super Teacher (selected on the login page)  
-- Lead Teacher (must select Morning / Afternoon / Evening after login, same style as Elite)  
-- Elite User (with batch selection)  
-- Member  
+**Super Admin (1) → Super Teachers (~5) → Lead Teachers (~8–10) → Elite Users (~110) → Members**
 
-and keeps the original hierarchy and all technical requirements intact.
+1. **Super Admin (1)**
+   - Complete system governance, user CRUD, role management.
+   - Global visibility over all Super Teachers, Lead Teachers, Elite Users, and Members.
+   - Configurable AI rate limits and execution audits.
+
+2. **Super Teachers (~5)**
+   - Oversee all Lead Teachers and cohorts across all shifts.
+   - Access the Lead Teacher & Shift Leaderboard (comparing shifts/leads by active Elite count, collection volume, and qualified verticals).
+   - High-level vertical monitor: directly view which verticals are "Good to Go" (Eligible) vs Service vs Parked.
+   - Access all Elite Leaderboards (Global and Shift-specific).
+   - Run system-wide AI query assistant on student venture readiness.
+
+3. **Lead Teachers (~8–10)**
+   - Assigned to a shift (Morning / Afternoon / Evening) selected upon login.
+   - View all Elite Users assigned to their shift.
+   - View all Members collected by their Elite Users and inspect their full AI domain evaluations.
+   - Access their own Shift-Timing Elite Leaderboard and the Global Elite Leaderboard.
+   - Run AI data query assistant for their shift cohort.
+
+4. **Elite Users (~110 Assistant Teachers)**
+   - Select their shift batch (Morning / Afternoon / Evening) upon login.
+   - Quick mobile intake (+ button) to register Members (Name, Domain, Experience, Phone, Description).
+   - Permanently tied to their collected Members.
+   - Trigger AI Domain Evaluations on collected Members.
+   - View member cards, detail pages with full evaluation breakdowns, and public leaderboards (Shift & Global).
+
+5. **Members**
+   - Students whose domain concepts are collected and evaluated.
+
+---
+
+### Multi-Tier Public Leaderboards
+
+Leaderboards are accessible to all roles with appropriate scopes:
+1. **Global Elite Leaderboard:** Ranks all ~110 Elite Users across all shifts by total members collected, verified authentic domains, and evaluation throughput.
+2. **Shift Elite Leaderboard:** Filters Elite User rankings by specific shift batch (Morning, Afternoon, Evening).
+3. **Lead Teacher & Shift Leaderboard:** Compares shifts and Lead Teachers by active Elite count, total collection volume, and qualified "Good to Go" verticals.
+
+---
+
+### AI Domain Evaluation UI
+
+The AI evaluation renders a crisp, structured card & breakdown:
+- **Decision Outcome:** Eligible ("Good to Go"), Service Domain, or Parked.
+- **Selling-Ease Screen:** 6 questions scored 0–10 with written evidence lines.
+- **Fatal-Flaw 8 Tests:** Pass (1), Partial (0.5), Fail (0) with written evidence lines and immediate Test 3 Expert Availability override.
+- **Beachhead Recommendation:** Actionable entry point when eligible.
+- **Validation Gates:** 60–90 day milestones (Sponsor, Twin, Builder, Slice).

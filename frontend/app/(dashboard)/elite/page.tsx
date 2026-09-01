@@ -26,8 +26,8 @@ const StatCard = ({
   value: string | number;
   color: string;
 }) => (
-  <div className="bg-card rounded-xl border border-border/80 p-4 sm:p-5 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow">
-    <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center shrink-0", color)}>
+  <div className="bg-card rounded-lg border border-border/80 p-4 sm:p-5 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow">
+    <div className={cn("h-11 w-11 rounded-lg flex items-center justify-center shrink-0", color)}>
       <Icon className="h-5 w-5" />
     </div>
     <div className="min-w-0">
@@ -167,12 +167,12 @@ export default function EliteDashboardPage() {
       {loading ? (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[...Array(6)].map((_, i) => (
-            <div key={i} className="h-48 rounded-xl bg-muted/40 shimmer" />
+            <div key={i} className="h-48 rounded-lg bg-muted/40 shimmer" />
           ))}
         </div>
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-4 py-20 text-center">
-          <div className="h-14 w-14 rounded-2xl bg-muted flex items-center justify-center">
+          <div className="h-14 w-14 rounded-lg bg-muted flex items-center justify-center">
             <Users className="h-7 w-7 text-muted-foreground" />
           </div>
           <div>
@@ -205,7 +205,7 @@ export default function EliteDashboardPage() {
               const oc = getOutcomeConfig(ev?.outcome);
               return (
                 <Link key={member.id} href={`/elite/members/${member.id}`}>
-                  <div className="group relative bg-card rounded-xl border border-border/80 overflow-hidden hover:border-primary/40 hover:shadow-lg hover:shadow-primary/8 transition-all duration-200 cursor-pointer flex flex-col h-full">
+                  <div className="group relative bg-card rounded-lg border border-border/80 overflow-hidden hover:border-primary/40 hover:shadow-lg hover:shadow-primary/8 transition-all duration-200 cursor-pointer flex flex-col h-full">
                     {/* Card top accent bar */}
                     <div className={cn(
                       "h-1 w-full transition-all",

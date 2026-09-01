@@ -396,7 +396,7 @@ export default function MemberDetailPage() {
       )}
 
       {error && (
-        <div className="p-4 rounded-xl text-sm font-medium bg-destructive/15 text-destructive border border-destructive/20">
+        <div className="p-4 rounded-lg text-sm font-medium bg-destructive/15 text-destructive border border-destructive/20">
           {error}
         </div>
       )}
@@ -425,13 +425,13 @@ export default function MemberDetailPage() {
             </CardHeader>
 
             <CardContent className="p-5 md:p-6 space-y-4">
-              <div className="bg-card p-4 rounded-xl border border-border/80 space-y-2">
+              <div className="bg-card p-4 rounded-lg border border-border/80 space-y-2">
                 <div className="font-bold text-xs uppercase text-muted-foreground tracking-wider">Outcome Justification</div>
                 <p className="text-sm leading-relaxed text-foreground">{result.outcome_reason}</p>
               </div>
 
               {result.beachhead_recommendation && (
-                <div className="bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-xl space-y-1">
+                <div className="bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-lg space-y-1">
                   <div className="font-bold text-xs uppercase text-emerald-700 dark:text-emerald-300 flex items-center gap-1.5">
                     <Target className="h-4 w-4" />
                     Recommended Beachhead Slice
@@ -445,7 +445,7 @@ export default function MemberDetailPage() {
               {/* Suitability Pros & Cons */}
               <div className="grid sm:grid-cols-2 gap-4 pt-2">
                 {result.why_suitable && (
-                  <div className="p-4 rounded-xl border border-emerald-200 bg-emerald-50/50 dark:bg-emerald-950/20 space-y-1.5">
+                  <div className="p-4 rounded-lg border border-emerald-200 bg-emerald-50/50 dark:bg-emerald-950/20 space-y-1.5">
                     <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300 uppercase block">
                       Why Suitable
                     </span>
@@ -456,7 +456,7 @@ export default function MemberDetailPage() {
                 )}
 
                 {result.why_not_suitable && (
-                  <div className="p-4 rounded-xl border border-rose-200 bg-rose-50/50 dark:bg-rose-950/20 space-y-1.5">
+                  <div className="p-4 rounded-lg border border-rose-200 bg-rose-50/50 dark:bg-rose-950/20 space-y-1.5">
                     <span className="text-xs font-bold text-rose-800 dark:text-rose-300 uppercase block">
                       Friction & Risk Factors
                     </span>
@@ -595,7 +595,7 @@ export default function MemberDetailPage() {
         </div>
       ) : (
         <Card className="p-12 text-center flex flex-col items-center justify-center gap-3 border-dashed">
-          <div className="h-12 w-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
+          <div className="h-12 w-12 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
             <Sparkles className="h-6 w-6" />
           </div>
           <div className="space-y-1">

@@ -59,7 +59,7 @@ export default function SelectBatchPage() {
                 : "border-border"
             }`}
           >
-            <div className="h-12 w-12 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center">
+            <div className="h-12 w-12 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center">
               <Sun className="h-6 w-6" />
             </div>
             <div>
@@ -80,7 +80,7 @@ export default function SelectBatchPage() {
                 : "border-border"
             }`}
           >
-            <div className="h-12 w-12 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center">
+            <div className="h-12 w-12 rounded-lg bg-blue-500/10 text-blue-600 flex items-center justify-center">
               <CloudSun className="h-6 w-6" />
             </div>
             <div>
@@ -101,7 +101,7 @@ export default function SelectBatchPage() {
                 : "border-border"
             }`}
           >
-            <div className="h-12 w-12 rounded-xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center">
+            <div className="h-12 w-12 rounded-lg bg-indigo-500/10 text-indigo-600 flex items-center justify-center">
               <Sunset className="h-6 w-6" />
             </div>
             <div>

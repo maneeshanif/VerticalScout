@@ -75,7 +75,7 @@ export default function EliteLeaderboardPage() {
       </div>
 
       <div className="text-center space-y-2">
-        <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-600 mb-1">
+        <div className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 mb-1">
           <Trophy className="h-6 w-6" />
         </div>
         <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Elite User Leaderboard</h1>

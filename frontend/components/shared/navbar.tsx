@@ -35,6 +35,11 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   {
+    href: "/",
+    label: "Home",
+    icon: Home,
+  },
+  {
     href: "/elite",
     label: "Candidates",
     icon: Users,
@@ -80,10 +85,10 @@ const NAV_ITEMS: NavItem[] = [
 ];
 
 const ROLE_COLORS: Record<string, string> = {
-  super_admin: "bg-rose-500/15 text-rose-600 border-rose-200",
-  super_teacher: "bg-amber-500/15 text-amber-700 border-amber-200",
-  lead_teacher: "bg-indigo-500/15 text-indigo-700 border-indigo-200",
-  elite_user: "bg-slate-500/10 text-slate-600 border-slate-200",
+  super_admin: "bg-rose-500/10 text-rose-700 border-rose-200 dark:bg-rose-950/30 dark:text-rose-300 dark:border-rose-900",
+  super_teacher: "bg-amber-500/10 text-amber-800 border-amber-200 dark:bg-amber-950/30 dark:text-amber-300 dark:border-amber-900",
+  lead_teacher: "bg-teal-500/10 text-teal-800 border-teal-200 dark:bg-teal-950/30 dark:text-teal-300 dark:border-teal-900",
+  elite_user: "bg-stone-500/10 text-stone-700 border-stone-200 dark:bg-stone-800/40 dark:text-stone-300 dark:border-stone-700",
 };
 
 const formatRole = (role: string) =>

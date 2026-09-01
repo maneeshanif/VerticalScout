@@ -190,7 +190,7 @@ export default function LeadTeacherDashboardPage() {
           </form>
 
           {aiAnswer && (
-            <div className="p-4 rounded-xl border bg-card/80 backdrop-blur space-y-2 animate-in fade-in">
+            <div className="p-4 rounded-lg border bg-card/80 backdrop-blur space-y-2 animate-in fade-in">
               <div className="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1.5">
                 <Sparkles className="h-3.5 w-3.5" />
                 <span>AI Insight</span>
@@ -309,7 +309,7 @@ export default function LeadTeacherDashboardPage() {
                       </div>
 
                       {userMembers.length === 0 ? (
-                        <div className="p-6 text-center text-xs text-muted-foreground border border-dashed rounded-xl">
+                        <div className="p-6 text-center text-xs text-muted-foreground border border-dashed rounded-lg">
                           This assistant teacher has not collected any candidate profiles yet.
                         </div>
                       ) : (

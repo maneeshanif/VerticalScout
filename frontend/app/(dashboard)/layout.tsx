@@ -24,7 +24,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+          <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
             <Loader2 className="h-5 w-5 animate-spin text-primary" />
           </div>
           <p className="text-xs text-muted-foreground font-medium">Loading VerticalGate…</p>

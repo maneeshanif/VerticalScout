@@ -134,7 +134,7 @@ export default function SuperTeacherPage() {
           </form>
 
           {aiAnswer && (
-            <div className="p-4 rounded-xl border bg-card/80 backdrop-blur space-y-2 animate-in fade-in">
+            <div className="p-4 rounded-lg border bg-card/80 backdrop-blur space-y-2 animate-in fade-in">
               <div className="text-xs font-bold text-amber-600 uppercase tracking-wider flex items-center gap-1.5">
                 <Sparkles className="h-3.5 w-3.5" />
                 <span>Super Teacher Intelligence</span>
