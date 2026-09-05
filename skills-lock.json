@@ -134,6 +134,12 @@
       "skillPath": "skills/karpathy-guidelines/SKILL.md",
       "computedHash": "41e8ca055bbde13d240776a14a076a59614057200340c243130a76ba4e64cac8"
     },
+    "lets-scroll": {
+      "source": "AIwithhassan/lets-scroll",
+      "sourceType": "github",
+      "skillPath": "skills/lets-scroll/SKILL.md",
+      "computedHash": "bdd5220f13cb2e282dd5c7fa3fc1253f80ed5e4517b271be2eab281d08a0e1cd"
+    },
     "minimalist-ui": {
       "source": "Leonxlnx/taste-skill",
       "sourceType": "github",
@@ -164,6 +170,12 @@
       "skillPath": "skills/review-animations/SKILL.md",
       "computedHash": "b9f669af5ae280c19a592a94611520335a81de25c88f225bf60ae4b2d66c8c7c"
     },
+    "scroll-experience": {
+      "source": "sickn33/antigravity-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/scroll-experience/SKILL.md",
+      "computedHash": "6002022f40b6f8bbd6f7e93bad13c7dac57034c3411da66ff6990d7c7a9ae445"
+    },
     "stitch-design-taste": {
       "source": "Leonxlnx/taste-skill",
       "sourceType": "github",
@@ -181,6 +193,12 @@
       "sourceType": "github",
       "skillPath": "skills/supabase-postgres-best-practices/SKILL.md",
       "computedHash": "e14e276241805c97dbcfe40dcbea1a3035269cc7293cac4b1832dda41a835e60"
+    },
+    "ui-ux-pro-max": {
+      "source": "community",
+      "sourceType": "custom",
+      "skillPath": "skills/ui-ux-pro-max/SKILL.md",
+      "computedHash": "1fac53df3136de9ffc7f30689e3c754a5cd3e9a58659b44db37c032aa6ea2fe3"
     },
     "write-swift": {
       "source": "emilkowalski/skills",
